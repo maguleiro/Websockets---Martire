@@ -25,7 +25,9 @@ app.use(express.urlencoded({extended:true}));
 
 //-------------BASE DE DATOS
 
-
+const DB_MENSAJES = [
+    { author: "Server", text: "Hola como andas"}
+]
 
 //-------------SERVIDOR
 
@@ -37,7 +39,7 @@ const server = httpServer.listen(PORT, () => {
 io.on('connection', (socket) =>{
     console.log(`Nuevo cliente conectado! ${socket.id}`)
 
-    socket.emit('from-server-saludo', 'Saludo desde el server!');
+    //socket.emit('from-server-saludo', 'Saludo desde el server!');
 
     socket.on('from-client-mensaje', (data) => {
         console.log(data)
@@ -48,5 +50,11 @@ io.on('connection', (socket) =>{
 
 //------------WEBSOCKET
 io.on('connection', (socket)=>{
-    console.log(`Nuevo cliente conectado! ${socket.id}`)
-})
+    console.log(`Nuevo cliente conectado! ${socket.id}`);
+    socket.emit('from-server-mensajes',  {DB_MENSAJES} );
+
+    socket.on('from-client-mensaje', mensaje => {
+        DB_MENSAJES.push(mensaje);
+        io.sockets.emit('from-server-mensajes', {DB_MENSAJES});
+    });
+});
